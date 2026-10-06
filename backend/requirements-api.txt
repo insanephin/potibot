@@ -1,0 +1,5 @@
+-r requirements-common.txt
+fastapi==0.142.2
+uvicorn[standard]==0.54.0
+pyjwt[crypto]==2.15.1
+alembic==1.20.0

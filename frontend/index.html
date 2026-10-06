@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/icon/potibot.ico" sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href="/icon/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icon/potibot.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>포티봇</title>
+    <script>
+      (function () {
+        var stored = null
+        try {
+          stored = localStorage.getItem('theme')
+        } catch (error) {}
+        var isDark = stored
+          ? stored === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.classList.toggle('dark', isDark)
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
