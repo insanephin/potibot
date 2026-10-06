@@ -33,6 +33,7 @@ frontend/
 │   └── src/
 │       ├── background.ts   # 서비스 워커: OAuth(launchWebAuthFlow), API 호출
 │       ├── content.ts      # open.spotify.com 대기열에 신청자 표시
+│       ├── site.ts         # 대시보드에 설치 표식 남김 (설치 안내 팝업용)
 │       └── popup-app.tsx   # 팝업 UI (로그인, 상태, 설정)
 ├── public/              # 폰트, 아이콘, 치지직·Spotify 로고
 ├── vite.config.ts             # 웹 빌드
@@ -79,4 +80,4 @@ npm run dev:extension            # 변경 감지 빌드
 
 확장으로 로그인하려면 백엔드 `config.ini`의 `global.extension_ids`에 확장 ID를 등록해야 합니다.
 
-`content.js`는 클래식 스크립트로 주입되므로 다른 청크를 import하면 빌드가 실패합니다.
+`content.js`·`site.js`는 클래식 스크립트로 주입되므로 다른 청크를 import하면 빌드가 실패합니다.

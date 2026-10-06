@@ -11,6 +11,7 @@ if (!/^\d+(\.\d+){0,3}$/.test(version)) throw new Error(`Invalid extension versi
 
 const icon = 'icon/potibot.png'
 const spotifyOrigin = 'https://open.spotify.com'
+const contentScripts = ['content', 'site']
 
 function manifest(): Plugin {
   return {
@@ -30,7 +31,10 @@ function manifest(): Plugin {
             icons: { 16: icon, 48: icon, 128: icon },
             action: { default_title: '포티봇', default_icon: { 16: icon, 32: icon }, default_popup: 'popup.html' },
             background: { service_worker: 'background.js', type: 'module' },
-            content_scripts: [{ matches: [`${spotifyOrigin}/*`], js: ['content.js'], run_at: 'document_idle' }],
+            content_scripts: [
+              { matches: [`${spotifyOrigin}/*`], js: ['content.js'], run_at: 'document_idle' },
+              { matches: [`${apiOrigin}/*`], js: ['site.js'], run_at: 'document_start' },
+            ],
 
             web_accessible_resources: [{ resources: [icon], matches: [`${spotifyOrigin}/*`] }],
             permissions: ['identity', 'storage'],
@@ -48,9 +52,13 @@ function classicContentScript(): Plugin {
   return {
     name: 'potibot-classic-content-script',
     generateBundle(_options, bundle) {
-      const chunk = bundle['content.js']
-      if (chunk?.type === 'chunk' && (chunk.imports.length > 0 || chunk.dynamicImports.length > 0)) {
-        this.error(`content.js must not import other chunks: ${[...chunk.imports, ...chunk.dynamicImports].join(', ')}`)
+      for (const name of contentScripts) {
+        const chunk = bundle[`${name}.js`]
+        if (chunk?.type === 'chunk' && (chunk.imports.length > 0 || chunk.dynamicImports.length > 0)) {
+          this.error(
+            `${name}.js must not import other chunks: ${[...chunk.imports, ...chunk.dynamicImports].join(', ')}`,
+          )
+        }
       }
     },
   }
@@ -76,10 +84,13 @@ export default defineConfig({
         popup: path.resolve(import.meta.dirname, 'extension/popup.html'),
         background: path.resolve(import.meta.dirname, 'extension/src/background.ts'),
         content: path.resolve(import.meta.dirname, 'extension/src/content.ts'),
+        site: path.resolve(import.meta.dirname, 'extension/src/site.ts'),
       },
       output: {
         entryFileNames: (chunk) =>
-          chunk.name === 'background' || chunk.name === 'content' ? `${chunk.name}.js` : 'assets/[name]-[hash].js',
+          chunk.name === 'background' || contentScripts.includes(chunk.name)
+            ? `${chunk.name}.js`
+            : 'assets/[name]-[hash].js',
       },
     },
   },

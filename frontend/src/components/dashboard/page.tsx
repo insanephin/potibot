@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { AppFooter } from '@/components/app/app-footer'
+import { ExtensionTip } from '@/components/dashboard/extension-tip'
 import { NowPlayingBar } from '@/components/dashboard/now-playing-bar'
 import { RequestsView } from '@/components/dashboard/requests-view'
 import { SettingsView } from '@/components/dashboard/settings-view'
@@ -91,6 +92,7 @@ function DashboardPanel({ spotifyStatus, playback, loading }: DashboardPanelProp
         )}
       </div>
       <LoadingOverlay show={loading || !requests.loaded || playerPending} />
+      <ExtensionTip />
     </>
   )
 }

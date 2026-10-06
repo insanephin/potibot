@@ -3,6 +3,9 @@ export const copyrightHolder = 'insanephin'
 
 export const contactEmail = 'insanephin@gmail.com'
 
+export const extensionStoreUrl = 'https://chromewebstore.google.com/detail/oagjjkagjahohhmojeiocpkcfmpbaiah'
+export const spotifyWebPlayerUrl = 'https://open.spotify.com'
+
 export const localPlaybackRequester = 'Spotify'
 
 export function formatRequester(requester: string | undefined): string {
