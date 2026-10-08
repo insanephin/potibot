@@ -123,6 +123,7 @@ let spotifySocket: WebSocket | null = null
 let spotifySocketConnecting: Promise<WebSocket> | null = null
 let spotifySocketReconnectTimer: number | undefined
 let spotifySocketReconnectAttempt = 0
+let lastSpotifyPlayerState: unknown = null
 let spotifyTokenRefreshPromise: Promise<{ access_token: string }> | null = null
 
 const spotifySocketRequests: PendingSpotifySocketRequest[] = []
@@ -148,6 +149,7 @@ function handleSpotifySocketMessage(data: string) {
   }
   if (!payload || typeof payload !== 'object') return
 
+  if ('track_window' in payload) lastSpotifyPlayerState = payload
   if (Array.isArray(payload) || 'track_window' in payload || 'queue' in payload || 'playback_data' in payload) {
     spotifySocketListeners.forEach((listener) => listener(payload))
   }
@@ -207,6 +209,7 @@ function getSpotifyWebSocket(): Promise<WebSocket> {
           socket.onerror = () => console.warn('[spotify] WebSocket error')
           socket.onclose = (event) => {
             if (spotifySocket === socket) spotifySocket = null
+            lastSpotifyPlayerState = null
             spotifySocketConnecting = null
             const error = new Error('Spotify WebSocket connection closed')
             reject(error)
@@ -223,6 +226,7 @@ function getSpotifyWebSocket(): Promise<WebSocket> {
 
 export function subscribeSpotifyWebSocket(listener: (payload: unknown) => void): () => void {
   spotifySocketListeners.add(listener)
+  if (lastSpotifyPlayerState) listener(lastSpotifyPlayerState)
   return () => spotifySocketListeners.delete(listener)
 }
 

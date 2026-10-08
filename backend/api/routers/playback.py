@@ -10,7 +10,7 @@ from fastapi.sse import EventSourceResponse, ServerSentEvent
 
 from core.channels import is_channel_live
 from core.keys import NOW_PLAYING_KEY
-from core.playback import get_stored_playback, stamp_for_client
+from core.playback import build_playback_state, get_stored_playback, stamp_for_client
 from core.queue import QUEUE_EVENTS, sync_spotify_queue
 from database.db import rd_client
 from providers.http import HTTPException as ProviderHTTPException
@@ -151,8 +151,7 @@ async def player_websocket(app: App, websocket: WebSocket, user: CurrentUserWs) 
     app.dashboard_connections[channel_id] += 1
     update_task = asyncio.create_task(forward_playback_updates(pubsub, send, send_queue))
     try:
-        if (stored := await get_stored_playback(channel_id)) is not None:
-            await send(stamp_for_client(stored))
+        await send(stamp_for_client(await get_stored_playback(channel_id) or build_playback_state(None)))
         while True:
             message = SpotifyWebSocketMessage.model_validate_json(await websocket.receive_text())
             handler = handlers.get(message.state)

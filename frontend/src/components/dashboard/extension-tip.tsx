@@ -26,8 +26,8 @@ export function ExtensionTip() {
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
-    if (!canInstallExtension() || Date.now() - readDismissedAt() < snoozeMs) return
-    const timer = window.setTimeout(() => setOpen(!extensionInstalled()), showDelayMs)
+    if (!canInstallExtension() || extensionInstalled() || Date.now() - readDismissedAt() < snoozeMs) return
+    const timer = window.setTimeout(() => setOpen(true), showDelayMs)
     return () => window.clearTimeout(timer)
   }, [])
 
@@ -36,6 +36,7 @@ export function ExtensionTip() {
     try {
       localStorage.setItem(dismissedAtKey, String(Date.now()))
     } catch {
+      return
     }
   }
 
