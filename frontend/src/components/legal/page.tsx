@@ -10,6 +10,12 @@ export type LegalDocument = 'terms' | 'privacy'
 
 const effectiveDate = '2026년 10월 1일'
 
+// update at 2026.11.8.
+const revisedUrls: Record<LegalDocument, string> = {
+  terms: 'https://insanephin.xyz/projects/potibot/terms',
+  privacy: 'https://insanephin.xyz/projects/potibot/privacy',
+}
+
 const documents: Record<LegalDocument, { title: string; intro: ReactNode; sections: LegalSection[] }> = {
   terms: {
     title: '이용약관',
@@ -39,6 +45,14 @@ export function LegalPage({ header, document }: { header: ReactNode; document: L
         </PanelHeader>
         <article className="flex flex-col gap-8 overflow-y-auto px-5 py-6 leading-7 break-keep md:px-8">
           <p className="text-muted-foreground">{intro}</p>
+          <p className="rounded-md border border-amber-500/40 bg-amber-500/5 px-4 py-3">
+            {title}이 개정되어 2026년 11월 8일부터{' '}
+            <a href={revisedUrls[document]} className="underline underline-offset-2">
+              새 {title}
+            </a>
+            이 적용됩니다. 주요 개정 내용과 변경 전·후 비교는 새 문서 상단의 '개정 안내'에서 확인할 수 있으며, 그 전까지는 아래
+            내용이 적용됩니다.
+          </p>
           {sections.map((section) => (
             <section key={section.title} className="flex flex-col gap-2">
               <h3 className="text-base font-semibold">{section.title}</h3>
