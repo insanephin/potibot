@@ -1,7 +1,7 @@
 export const appName = '포티봇'
 export const copyrightHolder = 'insanephin'
 
-export const contactEmail = 'insanephin@gmail.com'
+export const contactEmail = 'support@insanephin.xyz'
 
 export const extensionStoreUrl = 'https://chromewebstore.google.com/detail/oagjjkagjahohhmojeiocpkcfmpbaiah'
 export const spotifyWebPlayerUrl = 'https://open.spotify.com'
