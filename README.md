@@ -15,22 +15,16 @@
 
 ```
 potibot/
-├── backend/            # FastAPI + Socket.io (Python 3.11)
+├── backend/            # FastAPI + Socket.io (Python 3.13)
 ├── frontend/           # React 웹 대시보드 + 확장 프로그램 (Vite, TypeScript)
-├── deploy/             # Docker logrotate (3month)
-├── docker-compose.yml  # nginx / api / worker / frontend 서비스 정의
+├── deploy/             # 서비스 로그 90일 보관 (journald)
 └── nginx.conf          # Reverse Proxy
 ```
 
 ## 빠른 시작 (Docker)
 
 ```bash
-docker compose build api worker # DB 우선 구성
-docker compose run --rm api alembic stamp 0001
-docker compose run --rm api alembic check
-# "No new upgrade operations detected"가 나와야 정상
-
-docker compose up -d # 전체 빌드
+docker compose up -d --build # 전체 빌드 + 기동, 없는 DB 테이블은 api가 시작 시 생성
 ```
 
 이후 `http://localhost:8089`로 접속합니다.

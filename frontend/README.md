@@ -5,12 +5,7 @@
 두 출력물은 `src/`의 API 클라이언트·타입·UI 컴포넌트를 공유합니다.
 
 - React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui(Base UI), React Router, axios
-- Node 22-alpine
-
-| 서비스 | 빌드 | 출력 |
-| --- | --- | --- |
-| 웹 대시보드 | `npm run build` | `dist/` — nginx가 그대로 서빙 |
-| 확장 프로그램 | `npm run build:extension` | `dist-extension/` |
+- node:24-alpine
 
 ## 디렉터리 구조
 

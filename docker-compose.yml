@@ -1,18 +1,17 @@
 services:
   nginx:
-    image: nginx:alpine
-    container_name: reverse-proxy
+    build: ./frontend
+    image: potibot-web
+    container_name: frontend
     restart: unless-stopped
     ports:
       - "8089:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./frontend:/srv/frontend:ro
     networks:
       - local
     depends_on:
       - api
-      - frontend
 
   api:
     build:
@@ -47,18 +46,6 @@ services:
       - dbs
       - local
     command: python worker.py
-
-  frontend:
-    container_name: frontend
-    image: node:22-alpine
-    depends_on:
-      - api
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
-    networks:
-      - local
-    command: sh -c "npm ci && npm run build"
 
 networks:
   local:
