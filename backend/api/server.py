@@ -12,6 +12,8 @@ from core.playback import refresh_now_playing
 from core.queue import merge_queue
 from core.spotify import get_spotify_channels, is_spotify_rate_limited
 from core.tracks import prune_track_infos
+from database.db import engine
+from database.models import Base
 from providers.chzzk.client import ChzzkClient
 from providers.spotify.client import SpotifyClient
 
@@ -27,6 +29,9 @@ TRACK_END_GRACE_SECONDS = 1.0
 
 
 async def lifespan(app: "ApiServer"):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
     app.scheduler.add_job(app.update_is_live_data, "interval", seconds=LIVE_POLL_SECONDS)
     app.scheduler.add_job(app.update_now_playing, "interval", seconds=NOW_PLAYING_POLL_SECONDS)
     app.scheduler.add_job(app.cache_channels, "interval", seconds=CHANNEL_CACHE_SECONDS)

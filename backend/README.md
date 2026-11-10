@@ -19,7 +19,6 @@ backend/
 ├── core/           # 도메인 로직 (신청곡, 대기열, 재생 상태, 설정, 통계 …)
 ├── providers/      # 공통 HTTP 및 외부 API 클라이언트 (chzzk, spotify)
 ├── database/       # SQLAlchemy 모델, async 엔진, Redis 클라이언트
-├── migrations/     # Alembic 마이그레이션
 ├── utils/          # 로깅
 ├── tests/
 └── config.py       # config.ini
@@ -40,12 +39,11 @@ api, chatbot  →  core  →  database, providers, utils
 ## 로컬 개발
 
 ```bash
-python3.11 -m venv venv
+python3.13 -m venv venv
 source venv/bin/activate
 pip install -r requirements-dev.txt
 
-alembic upgrade head     # 스키마 적용
-python app.py            # API 서버 (별도 터미널)
+python app.py            # API 서버, 없는 테이블은 시작 시 생성 (별도 터미널)
 python worker.py         # Socket.io (별도 터미널)
 ```
 
@@ -83,12 +81,9 @@ python worker.py         # Socket.io (별도 터미널)
 | `!노래 신청 <검색어>` | Spotify에서 검색해 대기열에 추가 |
 | `!노래 취소` | 대기 중인 내 신청곡 취소 |
 
-## DB 마이그레이션
+## DB 스키마
 
-```bash
-alembic upgrade head
-alembic revision --autogenerate -m "변경사항"
-```
+API 서버가 시작할 때 [database/models.py](database/models.py)에 있는데 DB에 없는 테이블을 만듭니다. 이미 있는 테이블은 건드리지 않으므로, 기존 테이블에 컬럼을 추가하거나 바꿀 때는 DB에 직접 `ALTER TABLE`을 실행해야 합니다.
 
 ## 테스트
 

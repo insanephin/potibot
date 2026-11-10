@@ -134,5 +134,4 @@ dist-extension/
 
 *.ini
 !config.sample.ini
-!backend/alembic.ini
 !backend/tests/config.test.ini

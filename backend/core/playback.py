@@ -104,9 +104,13 @@ async def refresh_now_playing(channel_id: str, spotify, force: bool = False) -> 
         await mark_playbacks_played(channel_id, [previous_uri])
         await sync_spotify_queue(channel_id, spotify)
         await publish_queue_event(channel_id, "queue_changed")
-    elif device and not previous_device and await get_pending_playbacks(channel_id):
-        if (await sync_spotify_queue(channel_id, spotify))["added"]:
-            await publish_queue_event(channel_id, "queue_changed")
+    elif (
+        device
+        and not previous_device
+        and await get_pending_playbacks(channel_id)
+        and (await sync_spotify_queue(channel_id, spotify))["added"]
+    ):
+        await publish_queue_event(channel_id, "queue_changed")
 
     if uri and not state["paused"]:
         cancelled_key = CANCELLED_PUSHED_KEY.format(channel_id=channel_id)
