@@ -9,7 +9,7 @@ export type SpotifyDevice = {
 
 export const isSelectableDevice = (device: SpotifyDevice) => device.type.toLowerCase() === 'computer'
 
-export type SpotifyPlayerState = {
+type SpotifyPlayerState = {
   device: SpotifyDevice | null
   is_playing: boolean
   progress_ms: number | null

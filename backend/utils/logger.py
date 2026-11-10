@@ -48,6 +48,8 @@ def setup_logging(level=logging.INFO) -> dict:
                 "handlers": ["access"],
                 "propagate": False,
             },
+            "engineio.client": {"level": "WARNING"},
+            "socketio.client": {"level": "WARNING"},
         },
     }
 

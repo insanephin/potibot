@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse, RedirectResponse, Response
 
 from core.channels import get_info_by_channel_id
 
-from ..auth import AUTH_STATE_TTL_SECONDS
+from ..auth import AUTH_STATE_TTL_SECONDS, SESSION_TTL
 from ..deps import App, is_extension_redirect
 from ..schemas import ExtensionLoginComplete, ExtensionLoginStart
 from ..server import ApiServer
@@ -68,7 +68,14 @@ async def callback(app: App, request: Request, code: str, state: str) -> Respons
         return JSONResponse({"error": "Failed to complete Chzzk login."}, status_code=502)
 
     response = RedirectResponse(url="/")
-    response.set_cookie(key="token", value=token, httponly=True, secure=True, samesite="lax")
+    response.set_cookie(
+        key="token",
+        value=token,
+        max_age=int(SESSION_TTL.total_seconds()),
+        httponly=True,
+        secure=True,
+        samesite="lax",
+    )
     response.delete_cookie(STATE_COOKIE, httponly=True, secure=True, samesite="lax")
     return response
 

@@ -25,4 +25,10 @@ async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 
 rd_config = config["redis"]
-rd_client: Redis = Redis(host=rd_config["host"], port=int(rd_config["port"]), decode_responses=True)
+rd_client: Redis = Redis(
+    host=rd_config["host"],
+    port=int(rd_config["port"]),
+    username=rd_config.get("username") or None,
+    password=rd_config.get("password") or None,
+    decode_responses=True,
+)

@@ -1,4 +1,4 @@
-from sqlalchemy import func, update
+from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 
 from database.db import async_session
@@ -64,15 +64,13 @@ async def drop_refresh_token(user_id=None, provider: str | None = None, refresh_
     if not user_id or not provider or not refresh_token:
         return
     async with async_session() as session:
-        await session.execute(
-            update(AuthToken)
-            .where(
-                AuthToken.user_id == user_id,
-                AuthToken.provider == provider,
-                AuthToken.refresh_token == refresh_token,
+        row = (
+            await session.execute(
+                select(AuthToken).where(AuthToken.user_id == user_id, AuthToken.provider == provider).with_for_update()
             )
-            .values(refresh_token=None)
-        )
+        ).scalar_one_or_none()
+        if row and row.refresh_token == refresh_token:
+            row.refresh_token = None
         await session.commit()
 
 

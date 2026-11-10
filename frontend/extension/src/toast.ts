@@ -1,4 +1,4 @@
-export type ToastTone = 'success' | 'warning'
+type ToastTone = 'success' | 'warning'
 
 const visibleMs = 5_000
 const toneColors: Record<ToastTone, string> = { success: '#1ed760', warning: '#f5a623' }

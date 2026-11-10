@@ -5,6 +5,8 @@ from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Tex
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+from .crypto import EncryptedText
+
 
 class Base(DeclarativeBase):
     pass
@@ -17,8 +19,8 @@ class AuthToken(Base):
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
     )
     provider: Mapped[str] = mapped_column(String(20), primary_key=True)
-    access_token: Mapped[str | None] = mapped_column("accessToken", Text)
-    refresh_token: Mapped[str | None] = mapped_column("refreshToken", Text)
+    access_token: Mapped[str | None] = mapped_column("accessToken", EncryptedText)
+    refresh_token: Mapped[str | None] = mapped_column("refreshToken", EncryptedText)
     token_type: Mapped[str] = mapped_column("tokenType", String(20), default="Bearer")
     expires_in: Mapped[int | None] = mapped_column("expiresIn", Integer)
     scope: Mapped[str | None] = mapped_column(Text)
@@ -31,7 +33,6 @@ class User(Base):
         UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
     channel_id: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
-    token: Mapped[str] = mapped_column(String(255), nullable=True)
     token_version: Mapped[int] = mapped_column(Integer, nullable=False)
     is_streamer: Mapped[bool] = mapped_column(Boolean, default=False)
 
@@ -86,4 +87,4 @@ class SpotifyApp(Base):
         UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
     )
     client_id: Mapped[str] = mapped_column(String(64))
-    client_secret: Mapped[str] = mapped_column(String(64))
+    client_secret: Mapped[str] = mapped_column(EncryptedText)

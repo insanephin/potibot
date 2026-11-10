@@ -1,6 +1,6 @@
 import logging
 import secrets
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import jwt
 from sqlalchemy import select
@@ -16,6 +16,7 @@ from providers.spotify.client import SpotifyClient
 logger = logging.getLogger(__name__)
 
 AUTH_STATE_TTL_SECONDS = 300
+SESSION_TTL = timedelta(days=7)
 
 
 class SpotifyAccessRequired(Exception):
@@ -57,17 +58,20 @@ class AuthService:
         stored_provider, stored_user_id = result.split(":", 1)
         return stored_provider == provider and stored_user_id == str(user_id)
 
-    def encode_token(self, channel_id: str, token_version: int) -> str:
+    def encode_token(self, user_id: str, channel_id: str, token_version: int) -> str:
+        now = datetime.now(UTC)
         payload = {
+            "sub": user_id,
             "channel_id": channel_id,
             "token_version": token_version,
-            "iat": datetime.now(UTC),
+            "iat": now,
+            "exp": now + SESSION_TTL,
         }
         return jwt.encode(payload, self.private_key, algorithm=self.algorithm)
 
     def decode_token(self, token: str) -> dict | None:
         try:
-            return jwt.decode(token, self.public_key, algorithms=[self.algorithm])
+            return jwt.decode(token, self.public_key, algorithms=[self.algorithm], options={"require": ["exp"]})
         except jwt.InvalidTokenError:
             logger.warning("Invalid JWT token.")
             return None
@@ -76,13 +80,15 @@ class AuthService:
         if not token:
             return None
 
-        async with async_session() as session:
-            user = (await session.execute(select(User).where(User.token == token))).scalar_one_or_none()
-        if not user:
+        payload = self.decode_token(token)
+        if not payload or not payload.get("sub"):
             return None
 
-        payload = self.decode_token(token)
-        if not payload or payload.get("token_version") != user.token_version:
+        async with async_session() as session:
+            user = (
+                await session.execute(select(User).where(User.channel_id == payload.get("channel_id")))
+            ).scalar_one_or_none()
+        if not user or str(user.id) != payload["sub"] or payload.get("token_version") != user.token_version:
             return None
         return user
 
@@ -98,15 +104,11 @@ class AuthService:
                 user = User(channel_id=account.channelId, token_version=1)
                 session.add(user)
 
-            payload = self.decode_token(user.token) if user.token else None
-            if not payload or payload.get("token_version") != user.token_version:
-                user.token = self.encode_token(account.channelId, user.token_version)
-            token = user.token
             await session.flush()
 
             await save_provider_token(session, user.id, "chzzk", raw_token)
             await session.commit()
-            return token
+            return self.encode_token(str(user.id), account.channelId, user.token_version)
 
     async def get_spotify_token(self, user_id: str) -> AuthToken | None:
         async with async_session() as session:
